@@ -1,0 +1,77 @@
+[config]
+skip_core_tasks = true
+
+[tasks.setup]
+script = '''
+    echo installing git hooks
+    pre-commit --version || pip install pre-commit
+    pre-commit install || echo "failed to install git hooks!" 1>&2
+
+    echo "installing stuff for tests (cargo-nextest)"
+    cargo binstall -yq cargo-nextest
+'''
+
+[tasks.dev]
+command = "cargo"
+args = ["run"]
+watch = true
+
+# run tasks that change files (usually in dev)
+[tasks.format]
+run_task = [{ name = ["rustfmt-local", "clippy-local"] }]
+
+[tasks.fmt]
+alias = "format"
+
+[tasks.clippy-local]
+install_crate = "clippy"
+command = "cargo"
+args = ["clippy", "--tests", "--examples", "--all-targets", "--all-features"]
+
+[tasks.rustfmt-local]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all"]
+
+# runs tasks that don't change files (usually in CI)
+[tasks.lint]
+run_task = { name = ["rustfmt-ci", "clippy-ci"] }
+
+[tasks.clippy-ci]
+install_crate = "clippy"
+command = "cargo"
+args = [
+	"clippy",
+	"--tests",
+	"--examples",
+	"--all-targets",
+	"--all-features",
+	"--workspace",
+	"--",
+	"-D",
+	"warnings",
+]
+
+[tasks.rustfmt-ci]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all", "--", "--check"]
+
+# runs tests
+[tasks.test]
+env = { "RUN_MODE" = "test", "RUST_LOG" = "info", "RUST_BACKTRACE" = 0 }
+command = "cargo"
+args = [
+	"nextest",
+	"run",
+	"--examples",
+	"--all-targets",
+	"--all-features",
+	"${@}",
+]
+
+# runs tests in CI
+[tasks.test-ci]
+env = { "RUN_MODE" = "ci", "RUST_LOG" = "info" }
+command = "cargo"
+args = ["nextest", "run", "--examples", "--all-targets", "--all-features"]

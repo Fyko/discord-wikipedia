@@ -1,0 +1,44 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md"]
+  pull_request:
+    paths-ignore: ["**.md"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+concurrency:
+  cancel-in-progress: true
+  group: "${{ github.workflow }}-${{ github.head_ref || github.run_id }}"
+
+jobs:
+  run:
+    name: Test, Lint and Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Register problem matchers
+        uses: r7kamura/rust-problem-matchers@v1
+
+      - run: rustup toolchain install stable --profile minimal --no-self-update
+
+      - name: Cache Rust assets
+        uses: Swatinem/rust-cache@v2
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: nextest,cargo-make
+
+      - name: Lint and format
+        run: cargo make lint
+
+      - name: Run tests
+        run: cargo make test-ci
+
+      - name: Build
+        run: cargo build --release --all-features

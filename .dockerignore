@@ -1,0 +1,7 @@
+.git
+.github
+.vscode
+target
+.gitignore
+.pre-commit-config.yaml
+Dockerfile

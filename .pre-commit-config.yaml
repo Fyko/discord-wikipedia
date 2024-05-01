@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-toml
+      - id: check-yaml
+      - id: pretty-format-json
+        args: ["--indent=4", "--autofix", "--no-sort-keys"]
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: format
+        name: format
+        description: Format and lint files with rustfmt and Clippy.
+        entry: makers format
+        language: system
+        types: [rust]
+        pass_filenames: false
+      - id: check
+        name: check
+        description: Check files with Cargo Check
+        entry: cargo check
+        language: system
+        types: [rust]
+        pass_filenames: false
