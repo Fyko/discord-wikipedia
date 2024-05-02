@@ -1,7 +1,7 @@
 ARG TARGET=x86_64-unknown-linux-musl
 ARG BINARY_NAME=discord-wikipedia
 
-FROM --platform=$TARGETPLATFORM clux/muslrust:1.77.2 AS chef
+FROM --platform=$TARGETPLATFORM clux/muslrust:1.77.2-stable AS chef
 ARG TARGET
 ARG BINARY_NAME
 USER root
