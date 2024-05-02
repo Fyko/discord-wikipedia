@@ -1,30 +1,21 @@
-ARG TARGET=x86_64-unknown-linux-musl
-ARG BINARY_NAME=discord-wikipedia
-
-FROM --platform=$TARGETPLATFORM clux/muslrust:1.77.2-stable AS chef
-ARG TARGET
-ARG BINARY_NAME
+FROM clux/muslrust:1.77.2-stable AS chef
 USER root
 RUN cargo install cargo-chef
 WORKDIR /app
 
 FROM chef AS planner
-COPY Cargo.toml Cargo.lock ./
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
-RUN cargo chef cook --release --target "$TARGET" --recipe-path recipe.json
-COPY Cargo.toml Cargo.lock ./
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 COPY . .
-RUN cargo build --release --target "$TARGET" --bin $BINARY_NAME
+RUN cargo build --release --target x86_64-unknown-linux-musl --bin discord-wikipedia --no-default-features
 
-FROM --platform=$TARGETPLATFORM alpine:3.18.4 as runtime
-ARG TARGET
-ARG BINARY_NAME
-RUN apk --no-cache add ca-certificates
+FROM alpine:3.19.1 AS runtime
+WORKDIR /app
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/discord-wikipedia .
 
-COPY --from=builder /app/target/$TARGET/release/$BINARY_NAME /app/bin
-
-CMD /app/bin
+RUN ls -la
+CMD ["/app/discord-wikipedia"]
