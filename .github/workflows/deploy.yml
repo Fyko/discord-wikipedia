@@ -1,9 +1,8 @@
 name: Continuous Deployment
 
 on:
-  # comment out the following line to trigger the workflow on push
-  # push:
-  #   branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 env:
