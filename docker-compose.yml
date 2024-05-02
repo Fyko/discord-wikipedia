@@ -1,8 +1,11 @@
-version: "3.9"
-
 services:
-  app:
-    build: .
+  bot:
+    image: ghcr.io/fyko/discord-wikipedia:latest
+    expose:
+      - ${PORT:-10278}
     environment:
       RUST_LOG: ${RUST_LOG:-info}
+      PORT: ${PORT:-10278}
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DISCORD_PUBLIC_KEY: ${DISCORD_PUBLIC_KEY}
     restart: unless-stopped

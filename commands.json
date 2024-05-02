@@ -1,0 +1,26 @@
+[
+	{
+		"description": "Get a Wikipedia article",
+		"type": 1,
+		"name": "article",
+		"options": [
+			{
+				"autocomplete": true,
+				"choices": [],
+				"description": "The title of the article",
+				"type": 3,
+				"name": "title",
+				"required": true
+			}
+		],
+		"integration_types": [
+			0,
+			1
+		],
+		"contexts": [
+			0,
+			1,
+			2
+		]
+	}
+]

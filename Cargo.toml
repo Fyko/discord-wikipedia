@@ -1,5 +1,5 @@
 [package]
-name = "rust-template"
+name = "discord-wikipedia"
 version = "0.1.0"
 edition = "2021"
 authors = ["Carter Himmel <me@fyko.net>"]
@@ -12,6 +12,7 @@ tokio = { version = "1.34.0", features = [
   "io-util",
   "fs",
   "sync",
+  "full",
 ] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.17", features = [
@@ -23,11 +24,22 @@ reqwest = { version = "0.11.22", features = [
   "rustls-tls-webpki-roots",
   "json",
 ] }
-envy = "0.4.2"
 anyhow = "1.0.75"
 once_cell = "1.18.0"
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = "1.0.108"
+axum = { version = "0.7.5", features = ["macros", "tracing", "http2"] }
+tower-http = { version = "0.5", features = ["timeout", "trace"] }
+dotenv = "0.15.0"
+ed25519-dalek = "2.1.1"
+hex = "0.4.3"
+headers = "0.4.0"
+axum-extra = { version = "0.9.3", features = ["typed-header"] }
+twilight-model = "0.15.4"
+twilight-util = { version = "0.15.4", features = ["builder"] }
+html2md = "0.2.14"
+time = { version = "0.3.36", features = ["parsing"] }
+indoc = "2.0.5"
 
 [profile.release]
 strip = true
