@@ -41,7 +41,7 @@ pub async fn chat_input(data: Box<CommandData>) -> Result<InteractionResponse> {
             _ => false,
         });
 
-    let summary = match fetch_page_summary(&title).await {
+    let summary = match fetch_page_summary(title).await {
         Ok(summary) => summary,
         Err(e) => {
             tracing::warn!("{e}");
