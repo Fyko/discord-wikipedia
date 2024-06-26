@@ -11,6 +11,12 @@
 				"type": 3,
 				"name": "title",
 				"required": true
+			},
+			{
+				"name": "plaintext",
+				"description": "Display the article in plain text rather than a rich embed",
+				"type": 5,
+				"required": false
 			}
 		],
 		"integration_types": [

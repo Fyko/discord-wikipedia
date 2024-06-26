@@ -10,22 +10,36 @@ use twilight_model::{
     },
     http::interaction::{InteractionResponse, InteractionResponseType},
 };
+use twilight_util::builder::embed::{
+    EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder, ImageSource,
+};
 
 use crate::commands::text_response;
 use crate::wikipedia::{fetch_page_summary, fetch_search_results};
 
+use super::embed_response;
+
 pub async fn chat_input(data: Box<CommandData>) -> Result<InteractionResponse> {
     let title = data
         .options
-        .into_iter()
+        .iter()
         .find(|opt| opt.name == "title")
-        .map(|opt| match opt.value {
+        .map(|opt| match &opt.value {
             CommandOptionValue::String(value) => value,
             _ => panic!("WITCHCRAFT"),
         });
     let Some(title) = title else {
         return Ok(text_response("You need to provide a title!", true));
     };
+
+    let plaintext = data
+        .options
+        .iter()
+        .find(|opt| opt.name == "plaintext")
+        .map_or(false, |opt| match opt.value {
+            CommandOptionValue::Boolean(value) => value,
+            _ => false,
+        });
 
     let summary = match fetch_page_summary(&title).await {
         Ok(summary) => summary,
@@ -40,7 +54,6 @@ pub async fn chat_input(data: Box<CommandData>) -> Result<InteractionResponse> {
     let description = html2md::parse_html(&summary.description);
     let excerpt = html2md::parse_html(&summary.extract_html);
     let mut last_updated = String::new();
-
     if let Ok(timestamp) = OffsetDateTime::parse(&summary.timestamp, &Iso8601::DEFAULT) {
         last_updated = format!(
             "Last updated <t:{timestamp}:F> (<t:{timestamp}:R>)",
@@ -48,16 +61,39 @@ pub async fn chat_input(data: Box<CommandData>) -> Result<InteractionResponse> {
         );
     }
 
-    let content = indoc::formatdoc! {r#"
-		## [{title}](<{url}>)
-		{description}
-		### Excerpt
-		{excerpt}
+    if plaintext {
+        let content = indoc::formatdoc! {r#"
+            ## [{title}](<{url}>)
+            {description}
+            ### Excerpt
+            {excerpt}
 
-		{last_updated}
-	"#};
+            {last_updated}
+        "#};
 
-    Ok(text_response(content, false))
+        Ok(text_response(content, false))
+    } else {
+        let mut embed = EmbedBuilder::new()
+            .title(&title)
+            .url(&url)
+            .field(EmbedFieldBuilder::new("Description", &description).build())
+            .field(EmbedFieldBuilder::new("Excerpt", &excerpt).build())
+            .footer(EmbedFooterBuilder::new("Powered by Wikipedia").build());
+
+        if !last_updated.is_empty() {
+            embed = embed.description(last_updated);
+        }
+
+        if let Some(thumbnail) = summary.thumbnail {
+            if let Ok(source) = ImageSource::url(thumbnail.source) {
+                embed = embed.thumbnail(source);
+            }
+        }
+
+        let built = embed.build();
+
+        Ok(embed_response(vec![built], false))
+    }
 }
 
 pub async fn autocomplete(data: Box<CommandData>) -> anyhow::Result<InteractionResponse> {

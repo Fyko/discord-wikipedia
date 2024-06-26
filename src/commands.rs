@@ -1,6 +1,6 @@
 use twilight_model::{
     application::interaction::application_command::CommandData,
-    channel::message::MessageFlags,
+    channel::message::{Embed, MessageFlags},
     http::interaction::{InteractionResponse, InteractionResponseData, InteractionResponseType},
 };
 use twilight_util::builder::InteractionResponseDataBuilder;
@@ -16,6 +16,21 @@ where
         kind: InteractionResponseType::ChannelMessageWithSource,
         data: Some(InteractionResponseData {
             content: Some(content.to_string()),
+            flags: if ephemeral {
+                Some(MessageFlags::EPHEMERAL)
+            } else {
+                None
+            },
+            ..Default::default()
+        }),
+    }
+}
+
+pub fn embed_response(embeds: Vec<Embed>, ephemeral: bool) -> InteractionResponse {
+    InteractionResponse {
+        kind: InteractionResponseType::ChannelMessageWithSource,
+        data: Some(InteractionResponseData {
+            embeds: Some(embeds),
             flags: if ephemeral {
                 Some(MessageFlags::EPHEMERAL)
             } else {
